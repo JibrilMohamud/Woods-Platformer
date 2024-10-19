@@ -11,7 +11,6 @@ pygame.display.set_caption('The Forest Platformer')
 font = pygame.font.Font(None, 74)
 small_font = pygame.font.Font(None, 36)
 
-# Game states
 START_SCREEN = 0
 MAIN_GAME = 1
 GAME_OVER = 2
@@ -30,8 +29,8 @@ BLACK = (0, 0, 0)
 def draw_tree(x, y):
     trunk_width, trunk_height = 20, 40
     foliage_radius = 30
-    pygame.draw.rect(screen, BROWN, (x, y, trunk_width, trunk_height))  # Trunk
-    pygame.draw.circle(screen, GREEN, (x + trunk_width // 2, y), foliage_radius)  # Foliage
+    pygame.draw.rect(screen, BROWN, (x, y, trunk_width, trunk_height)) 
+    pygame.draw.circle(screen, GREEN, (x + trunk_width // 2, y), foliage_radius)
 
 class Coin:
     def __init__(self, x, y):
@@ -66,7 +65,6 @@ class SmartBird:
         self.speed = random.randint(5, 10)
 
     def update(self, player_pos, scroll_speed):
-        # Move towards the player
         if self.x > player_pos[0]:
             self.x -= self.speed + scroll_speed
         if self.y > player_pos[1]:
@@ -116,9 +114,8 @@ def generate_birds():
     return birds
 
 
-# Function to reset tree positions with spacing
 def reset_tree_position(trees, min_spacing=50):
-    last_tree_x = max(trees, key=lambda t: t[0])[0]  # Get the maximum x value
+    last_tree_x = max(trees, key=lambda t: t[0])[0]
     new_x = last_tree_x + min_spacing + random.randint(100, 350)
     return new_x, SCREEN_HEIGHT - 140
 
@@ -127,7 +124,6 @@ coins = generate_coins(5000)
 birds = generate_birds()
 coin_count = 0
 
-# Scroll settings
 scroll_speed = 2
 player_size = (50, 50)
 player_pos = [100, 500]
@@ -138,34 +134,30 @@ jump_strength = -10
 ground_level = 500 - player_size[1]
 jumps = 0
 
-# Load player frames
 frame1 = pygame.image.load("frame1.png").convert_alpha()
 frame2 = pygame.image.load("frame2.png").convert_alpha()
 frame1 = pygame.transform.scale(frame1, player_size)
 frame2 = pygame.transform.scale(frame2, player_size)
 player_frames = [frame1, frame2]
 frame_index = 0
-animation_speed = 0.1  # Lower value means faster animation
-animation_delay = 5  # Delay in frames before switching
+animation_speed = 0.1 
+animation_delay = 5 
 current_delay = 0
 
-# Define function to draw clouds
 def draw_cloud(x, y):
     pygame.draw.ellipse(screen, WHITE, (x, y, 80, 40))
     pygame.draw.ellipse(screen, WHITE, (x - 40, y + 20, 80, 40))
     pygame.draw.ellipse(screen, WHITE, (x + 40, y + 20, 80, 40))
     pygame.draw.ellipse(screen, WHITE, (x, y + 20, 80, 40))
 
-# Check collision
 def check_collision(player_rect, rect):
     return player_rect.colliderect(rect)
 
 
 bubble_active = False
-bubble_duration = 100  # Duration the bubble is active, in frames
+bubble_duration = 100  
 bubble_timer = 0
 
-# Main game loop
 running = True
 clock = pygame.time.Clock()
 
@@ -183,15 +175,15 @@ while running:
                 player_speed = 5
                 scroll_speed = 2
                 trees = generate_trees(5)
-                coins = generate_coins(5000)  # Ensure new coins are generated on restart
+                coins = generate_coins(5000)  
                 birds = generate_birds()
-                jumps = 0  # Reset jumps
-                coin_count = 0  # Reset coin count
+                jumps = 0 
+                coin_count = 0  
             elif event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
             elif event.key == pygame.K_SPACE:
-                if jumps < 2:  # Allow up to two jumps
+                if jumps < 2:  
                     player_vel_y = jump_strength
                     jumps += 1
                     frame_index = 0
@@ -201,21 +193,19 @@ while running:
                     bubble_timer = bubble_duration
                     coin_count -= 5
                 else:
-                    print("Not enough coins to activate bubble")  # Message indicating refusal
+                    print("Not enough coins to activate bubble")  
 
     if game_state == START_SCREEN:
         screen.fill(BACKGROUND_COLOR)
         title_text = font.render("Press Enter to Start", True, WHITE)
         screen.blit(title_text, ((SCREEN_WIDTH - title_text.get_width()) // 2, SCREEN_HEIGHT // 2))
     elif game_state == MAIN_GAME:
-        # Player movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
             player_pos[0] += player_speed
             current_delay += 1
-            player_speed += 0.002  # Increase speed continuously while holding the right key
+            player_speed += 0.002  
 
-        # Apply gravity
         player_vel_y += gravity
         player_pos[1] += player_vel_y
         if player_pos[1] >= ground_level:
@@ -225,15 +215,13 @@ while running:
 
         scroll_speed += 0.002
         player_pos[0] -= scroll_speed
-
-        # Check if player goes off-screen
+        
         if player_pos[0] < -player_size[0] or player_pos[0] > SCREEN_WIDTH or player_pos[1] < -player_size[1] or player_pos[1] > SCREEN_HEIGHT:
             game_state = GAME_OVER
 
-        # Scroll the background
         for i in range(len(trees)):
             trees[i] = (trees[i][0] - scroll_speed, trees[i][1])
-            if trees[i][0] < -60:  # If the tree goes off the screen, reset its position
+            if trees[i][0] < -60: 
                 trees[i] = reset_tree_position(trees)
 
         for coin in coins:
@@ -254,30 +242,24 @@ while running:
             if bubble_timer <= 0:
                 bubble_active = False
 
-        # Draw the background
         screen.fill(BACKGROUND_COLOR)
 
-        # Draw ground
         pygame.draw.rect(screen, GRASS_COLOR, (0, ground_level + player_size[1] - 5, SCREEN_WIDTH, SCREEN_HEIGHT - (ground_level + player_size[1] - 5)))
 
-        # Draw clouds
         draw_cloud(150, 100)
         draw_cloud(300, 150)
         draw_cloud(450, 50)
         draw_cloud(600, 120)
 
-        # Draw trees
         for tree in trees:
             draw_tree(tree[0], tree[1])
 
-        # Draw coins
         for coin in coins:
             coin.draw()
 
         for bird in birds:
             bird.draw()
 
-        # Check collision with trees
         player_rect = pygame.Rect(player_pos[0], player_pos[1], player_size[0], player_size[1])
         for tree in trees:
             tree_rect = pygame.Rect(tree[0], tree[1], 20, 40)  # Tree trunk size
@@ -289,25 +271,21 @@ while running:
             if check_collision(player_rect, bird_rect) and not bubble_active:
                 game_state = GAME_OVER
 
-        # Check collision with coins
         for coin in coins[:]:
             coin_rect = pygame.Rect(coin.x - 15, coin.y - 15, 30, 30)
             if check_collision(player_rect, coin_rect):
                 coins.remove(coin)
                 coin_count += 1
 
-        # Update frame index to alternate between 0 and 1 based on delay
         if current_delay >= animation_delay:
             frame_index = (frame_index + 1) % 2
             current_delay = 0
 
-        # Draw the player sprite
         screen.blit(player_frames[frame_index], player_pos)
 
         if bubble_active:
             pygame.draw.circle(screen, (0, 255, 255), (player_pos[0] + player_size[0] // 2, player_pos[1] + player_size[1] // 2), player_size[0])
 
-        # Display coin count
         coin_text = small_font.render(f"Coins: {coin_count}", True, WHITE)
         screen.blit(coin_text, (SCREEN_WIDTH - coin_text.get_width() - 10, 10))
 
@@ -323,6 +301,5 @@ while running:
         exit_text = font.render("Press ESC to Exit", True, RED)
         screen.blit(exit_text, ((SCREEN_WIDTH - exit_text.get_width()) // 2, SCREEN_HEIGHT // 2 + 100))
 
-    # Update the display
     pygame.display.flip()
     clock.tick(30)
